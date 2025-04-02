@@ -9,7 +9,7 @@ async function main() {
     const tree = await builder.buildTree(regex);
 
     console.log(tree);
-
+    console.log(JSON.stringify(tree, null, 4));
 }
 
 main();
