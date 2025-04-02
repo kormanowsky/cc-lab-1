@@ -11,12 +11,16 @@ export enum INodeType {
 };
 
 export interface INode {
+    id: number;
     type: INodeType;
-    left?: INode;
-    right?: INode;
     content?: string;
 };
 
+export interface ITree {
+    nodes: INode[];
+    parents: Record<number, [number, boolean] | undefined>;
+};
+
 export interface ITreeBuilder {
-    buildTree(regex: string): Promise<INode>;
+    buildTree(regex: string): Promise<ITree>;
 };
