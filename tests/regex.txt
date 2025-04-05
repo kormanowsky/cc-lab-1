@@ -1,1 +1,1 @@
-ab|cdefg
+ab|cde+f*g

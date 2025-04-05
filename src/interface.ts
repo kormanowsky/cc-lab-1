@@ -1,3 +1,5 @@
+import { exitCode } from "process";
+
 export interface IRegexReader {
     readRegex(): Promise<string>;
 };
@@ -24,3 +26,7 @@ export interface ITree {
 export interface ITreeBuilder {
     buildTree(regex: string): Promise<ITree>;
 };
+
+export interface ITreePrinter {
+    printTree(tree: ITree): Promise<void>;
+}
