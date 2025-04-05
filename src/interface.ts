@@ -10,6 +10,8 @@ export enum INodeType {
     NODE_ALT,
     NODE_ITER,
     NODE_ZITER,
+    NODE_OPENING_BRACE,
+    NODE_CLOSING_BRACE
 };
 
 export interface INode {

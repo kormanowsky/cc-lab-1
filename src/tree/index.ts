@@ -13,129 +13,93 @@ export class TreeBuilder implements ITreeBuilder {
             parents: {}
         };
 
-        const stack: string[] = [];
+        const stack: Omit<INode, 'id'>[] = [];
 
         let curNodeId: number = -1;
 
         for(let ch of regex) {
             // prio = MAX 
             if (ch == '(') {
-                stack.push(ch);
+                stack.push({type: INodeType.NODE_OPENING_BRACE});
             } else if (ch == ')') {
-                while(stack[stack.length - 1] != '(') {
-                    const ch = stack.pop();
-                    let nodeType: INodeType | undefined = undefined;
-                    switch(ch) {
-                        case '+':
-                            nodeType = INodeType.NODE_ITER;
-                            break;
-                        case '*':
-                            nodeType = INodeType.NODE_ZITER;
-                            break;
-                        case '@': 
-                            nodeType = INodeType.NODE_ALT;
-                            break;
-                        case '(':
-                            break;
-                        default: 
-                            throw new Error('unknown in stack: ' + ch);
-                    }
-
-                    if (nodeType) {
-                        tree.nodes.push({
-                            id: curNodeId++,
-                            type: nodeType
-                        });
-                    }
+                while(stack[stack.length - 1].type != INodeType.NODE_OPENING_BRACE) {
+                    const top = stack.pop()!;
+                    tree.nodes.push({
+                        ...top,
+                        id: ++curNodeId
+                    });
                 }
             }
             // prio = 2
             else if (ch == '+' || ch == '*') {
-                while (stack.length > 0 && ['+', '*'].includes(stack[stack.length - 1])) {
+                while (
+                    stack.length > 0 && 
+                    [INodeType.NODE_ITER, INodeType.NODE_ZITER].includes(stack[stack.length - 1].type)
+                ) {
                     const top = stack.pop()!;
 
                     tree.nodes.push({
-                        id: curNodeId++,
-                        type: top == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER
+                        ...top,
+                        id: ++curNodeId,
                     });
                 }
 
-                stack.push(ch);
+                stack.push({type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER});
             }
             // prio = 0
             else if (ch == '|') {
                 while (stack.length > 0) {
-                    const top = stack.pop();
-                    let nodeType: INodeType;
-
-                    switch(top) {
-                        case '+':
-                            nodeType = INodeType.NODE_ITER;
-                            break;
-                        case '*':
-                            nodeType = INodeType.NODE_ZITER;
-                            break;
-                        case '@': 
-                            nodeType = INodeType.NODE_ALT;
-                            break;
-                        default: 
-                            throw new Error('unknown in stack: ' + ch);
-                    }
+                    const top = stack.pop()!;
 
                     tree.nodes.push({
-                        id: curNodeId++,
-                        type: nodeType
+                        ...top,
+                        id: ++curNodeId,
                     });
                 }
 
-                stack.push(ch);
+                stack.push({type: INodeType.NODE_ALT});
             // prio = 1
             } else {
+                const node = {type: INodeType.NODE_CHAR, content: ch};
+
+                // stack.push(node);
+
                 tree.nodes.push({
-                    id: ++curNodeId,
-                    type: INodeType.NODE_CHAR,
-                    content: ch
+                    ...node,
+                    id: ++curNodeId
                 });
 
                 if (tree.nodes.length > 0) {
                     while(
                         stack.length > 0 && 
-                        ['@', '+', '*'].includes(stack[stack.length - 1].type)
+                        [
+                            INodeType.NODE_CONCAT,
+                            INodeType.NODE_ITER,
+                            INodeType.NODE_ZITER,
+                        ].includes(stack[stack.length - 1].type)
                     ) {
-                        const top = stack.pop();
-                        let nodeType: INodeType;
-
-                        switch(top) {
-                            case '+':
-                                nodeType = INodeType.NODE_ITER;
-                                break;
-                            case '*':
-                                nodeType = INodeType.NODE_ZITER;
-                                break;
-                            case '@': 
-                                nodeType = INodeType.NODE_ALT;
-                                break;
-                            default: 
-                                throw new Error('unknown in stack: ' + ch);
-                        }
+                        const top = stack.pop()!;
 
                         tree.nodes.push({
-                            id: curNodeId++,
-                            type: nodeType
+                            ...top,
+                            id: ++curNodeId
                         });
+
+                        
                     }
 
-                    stack.push({
-                        id: ++curNodeId,
-                        type: INodeType.NODE_CONCAT,
-                    });
+                    stack.push({type: INodeType.NODE_CONCAT});
                 }
             }
         }
 
         while (stack.length > 0) {
             const top = stack.pop()!;
-            tree.nodes.push(top);
+
+            tree.nodes.push({
+                ...top,
+                id: ++curNodeId
+            });
         }
 
         return tree;
