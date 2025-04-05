@@ -15,29 +15,25 @@ export class TreeBuilder implements ITreeBuilder {
 
         const stack: INode[] = [];
 
-        let curNodeId: number = -1;
+        let curNodeId = -1;
+        let letters = 0;
 
         for(let ch of regex) {
             // prio = MAX 
             if (ch == '(') {
-                stack.push({id: curNodeId++, type: INodeType.NODE_OPENING_BRACE});
+                stack.push({id: ++curNodeId, type: INodeType.NODE_OPENING_BRACE});
             } else if (ch == ')') {
-                while(stack[stack.length - 1].type != INodeType.NODE_OPENING_BRACE) {
+                while(
+                    stack.length > 0 && 
+                    stack[stack.length - 1].type != INodeType.NODE_OPENING_BRACE
+                ) {
                     const top = stack.pop()!;
                     tree.nodes.push(top);
                 }
             }
             // prio = 2
             else if (ch == '+' || ch == '*') {
-                while (
-                    stack.length > 0 && 
-                    [INodeType.NODE_ITER, INodeType.NODE_ZITER].includes(stack[stack.length - 1].type)
-                ) {
-                    const top = stack.pop()!;
-                    tree.nodes.push(top);
-                }
-
-                stack.push({id: ++curNodeId, type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER});
+                tree.nodes.push({id: ++curNodeId, type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER});
             }
             // prio = 0
             else if (ch == '|') {
@@ -46,16 +42,11 @@ export class TreeBuilder implements ITreeBuilder {
                     tree.nodes.push(top);
                 }
 
-                stack.push({id: curNodeId++, type: INodeType.NODE_ALT});
+                stack.push({id: ++curNodeId, type: INodeType.NODE_ALT});
+                letters = 0;
             // prio = 1
             } else {
-                const node = {id: curNodeId++, type: INodeType.NODE_CHAR, content: ch};
-
-                // stack.push(node);
-
-                tree.nodes.push(node);
-
-                if (tree.nodes.length > 0) {
+                if (letters >= 1) {
                     while(
                         stack.length > 0 && 
                         [
@@ -70,6 +61,10 @@ export class TreeBuilder implements ITreeBuilder {
 
                     stack.push({id: ++curNodeId, type: INodeType.NODE_CONCAT});
                 }
+
+                const node = {id: ++curNodeId, type: INodeType.NODE_CHAR, content: ch};
+                tree.nodes.push(node);
+                letters++;
             }
         }
 
