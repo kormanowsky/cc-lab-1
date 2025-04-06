@@ -1,3 +1,5 @@
+import { exitCode } from "process";
+
 export interface IRegexReader {
     readRegex(): Promise<string>;
 };
@@ -8,15 +10,25 @@ export enum INodeType {
     NODE_ALT,
     NODE_ITER,
     NODE_ZITER,
+    NODE_OPENING_BRACE,
+    NODE_CLOSING_BRACE
 };
 
 export interface INode {
+    id: number;
     type: INodeType;
-    left?: INode;
-    right?: INode;
     content?: string;
 };
 
-export interface ITreeBuilder {
-    buildTree(regex: string): Promise<INode>;
+export interface ITree {
+    nodes: INode[];
+    parents: Record<number, [number, boolean] | undefined>;
 };
+
+export interface ITreeBuilder {
+    buildTree(regex: string): Promise<ITree>;
+};
+
+export interface ITreePrinter {
+    printTree(tree: ITree): Promise<void>;
+}
