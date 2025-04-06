@@ -120,7 +120,7 @@ export class TreeBuilder implements ITreeBuilder {
             nextCh = regex[i + 1];
 
             if (ch == '(') {
-                stack.push({id: ++curNodeId, type: INodeType.NODE_OPENING_BRACE});
+                stack.push({id: -1, type: INodeType.NODE_OPENING_BRACE});
             } else if (ch == ')') {
                 let top: INode | undefined = undefined;
                 let prevTop: INode | undefined = undefined;
@@ -149,6 +149,8 @@ export class TreeBuilder implements ITreeBuilder {
                     type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER
                 };
 
+                tree.nodes.push(node);
+
                 if (
                     prevTop && 
                     prevTop.type !== INodeType.NODE_OPENING_BRACE && 
@@ -158,6 +160,7 @@ export class TreeBuilder implements ITreeBuilder {
 
                     stack.push(concatNode);
                     tree.nodes.push(concatNode);
+
                     tree.parents[concatNode.id] = tree.parents[top.id];
                     tree.parents[node.id] = [concatNode.id, true];
                     tree.parents[prevTop.id] = [concatNode.id, false];
@@ -169,7 +172,6 @@ export class TreeBuilder implements ITreeBuilder {
                     tree.parents[node.id] = tree.parents[top.id];
                 }
 
-                tree.nodes.push(node);
                 tree.parents[top.id] = [node.id, true];
             } else if (ch == '|') {
                 const node = {
@@ -190,21 +192,25 @@ export class TreeBuilder implements ITreeBuilder {
                 stack.push(node);
                 tree.nodes.push(node);
             } else {
-                const node = {id: ++curNodeId, type: INodeType.NODE_CHAR, content: ch};
-                stack.push(node);
-                tree.nodes.push(node);
+                const node = {id: -1, type: INodeType.NODE_CHAR, content: ch};
 
                 if ((prevCh == ')' || !'(|'.includes(prevCh)) && !'+*'.includes(nextCh)) {
-                    const top1 = stack.pop()!;
-                    const top2 = stack.pop()!;
-                    const node = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
+                    const top = stack.pop()!;
+                    const concatNode = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
 
+                    node.id = ++curNodeId;
+
+                    stack.push(concatNode);
+                    tree.nodes.push(concatNode);
+
+                    tree.parents[top.id] = [concatNode.id, false];
+                    tree.parents[node.id] = [concatNode.id, true];
+                } else {
+                    node.id = ++curNodeId;
                     stack.push(node);
-                    tree.nodes.push(node);
-
-                    tree.parents[top1.id] = [node.id, true];
-                    tree.parents[top2.id] = [node.id, false];
                 }
+
+                tree.nodes.push(node);
             }
         }
 
