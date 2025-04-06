@@ -1,1 +1,1 @@
-(ab|cd)ef
+((((((((((a+b)+c)+d)+e)+f)g)h)ij)k)l)mnop*|q+

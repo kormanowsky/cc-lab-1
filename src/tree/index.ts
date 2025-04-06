@@ -111,14 +111,16 @@ export class TreeBuilder implements ITreeBuilder {
         // }
 
         let prevCh = '';
+        let ch = '';
+        let nextCh = regex[0];
 
-        for(const ch of regex) {
-            console.log('got', ch);
+        for(let i = 0; i < regex.length; ++i) {
+            prevCh = ch;
+            ch = nextCh;
+            nextCh = regex[i + 1];
 
             if (ch == '(') {
                 stack.push({id: ++curNodeId, type: INodeType.NODE_OPENING_BRACE});
-
-                console.log(stack);
             } else if (ch == ')') {
                 let top: INode | undefined = undefined;
                 let prevTop: INode | undefined = undefined;
@@ -130,8 +132,6 @@ export class TreeBuilder implements ITreeBuilder {
                         tree.parents[prevTop.id] = [top.id, true];
                     }
 
-                    console.log(stack);
-
                     prevTop = top;
                 }
 
@@ -140,23 +140,37 @@ export class TreeBuilder implements ITreeBuilder {
                 if (top) {
                     stack.push(top);
                 }
-
-                console.log(stack);
-
             } else if (ch == '+' || ch == '*') {
                 const top = stack.pop()!;
+                const prevTop = stack.pop();
 
                 const node = {
                     id: ++curNodeId, 
                     type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER
                 };
 
-                stack.push(node);
+                if (
+                    prevTop && 
+                    prevTop.type !== INodeType.NODE_OPENING_BRACE && 
+                    prevTop.type !== INodeType.NODE_ALT
+                ) {
+                    const concatNode = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
+
+                    stack.push(concatNode);
+                    tree.nodes.push(concatNode);
+                    tree.parents[concatNode.id] = tree.parents[top.id];
+                    tree.parents[node.id] = [concatNode.id, true];
+                    tree.parents[prevTop.id] = [concatNode.id, false];
+                } else {
+                    if (prevTop) {
+                        stack.push(prevTop);
+                    }
+                    stack.push(node);
+                    tree.parents[node.id] = tree.parents[top.id];
+                }
+
                 tree.nodes.push(node);
-                tree.parents[node.id] = tree.parents[top.id];
                 tree.parents[top.id] = [node.id, true];
-    
-                console.log(stack);
             } else if (ch == '|') {
                 const node = {
                     id: ++curNodeId,
@@ -171,21 +185,16 @@ export class TreeBuilder implements ITreeBuilder {
                     const top = stack.pop()!;
                     
                     tree.parents[top.id] = [node.id, false];
-
-                    console.log(stack);
                 }
 
                 stack.push(node);
                 tree.nodes.push(node);
-
-                console.log(stack);
             } else {
                 const node = {id: ++curNodeId, type: INodeType.NODE_CHAR, content: ch};
                 stack.push(node);
                 tree.nodes.push(node);
-                console.log(stack);
 
-                if (prevCh == ')' || !'(|'.includes(prevCh)) {
+                if ((prevCh == ')' || !'(|'.includes(prevCh)) && !'+*'.includes(nextCh)) {
                     const top1 = stack.pop()!;
                     const top2 = stack.pop()!;
                     const node = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
@@ -195,12 +204,8 @@ export class TreeBuilder implements ITreeBuilder {
 
                     tree.parents[top1.id] = [node.id, true];
                     tree.parents[top2.id] = [node.id, false];
-
-                    console.log(stack);
                 }
             }
-
-            prevCh = ch;
         }
 
         let prevTop: INode | undefined = undefined;
@@ -211,8 +216,6 @@ export class TreeBuilder implements ITreeBuilder {
             if (prevTop) {
                 tree.parents[prevTop.id] = [top.id, true];
             }
-
-            console.log(stack);
 
             prevTop = top;
         }
