@@ -121,11 +121,18 @@ export class TreeBuilder implements ITreeBuilder {
                 console.log(stack);
             } else if (ch == ')') {
                 let top: INode | undefined = undefined;
+                let prevTop: INode | undefined = undefined;
 
                 while(stack.length > 0 && stack[stack.length - 1].type !== INodeType.NODE_OPENING_BRACE) {
                     top = stack.pop()!;
 
+                    if (prevTop) {
+                        tree.parents[prevTop.id] = [top.id, true];
+                    }
+
                     console.log(stack);
+
+                    prevTop = top;
                 }
 
                 stack.pop();
@@ -137,34 +144,57 @@ export class TreeBuilder implements ITreeBuilder {
                 console.log(stack);
 
             } else if (ch == '+' || ch == '*') {
-                const top = stack.pop();
-                stack.push({
+                const top = stack.pop()!;
+
+                const node = {
                     id: ++curNodeId, 
                     type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER
-                });
+                };
+
+                stack.push(node);
+                tree.nodes.push(node);
+                tree.parents[node.id] = tree.parents[top.id];
+                tree.parents[top.id] = [node.id, true];
+    
                 console.log(stack);
             } else if (ch == '|') {
-                while(stack.length > 0 && stack[stack.length - 1].type !== INodeType.NODE_OPENING_BRACE) {
-                    const top1 = stack.pop();
+                const node = {
+                    id: ++curNodeId,
+                    type: INodeType.NODE_ALT
+                };
+
+                while(
+                    stack.length > 0 && 
+                    stack[stack.length - 1].type !== INodeType.NODE_OPENING_BRACE && 
+                    stack[stack.length - 1].type !== INodeType.NODE_ALT
+                ) {
+                    const top = stack.pop()!;
+                    
+                    tree.parents[top.id] = [node.id, false];
 
                     console.log(stack);
                 }
 
-                stack.push({
-                    id: ++curNodeId,
-                    type: INodeType.NODE_ALT
-                });
+                stack.push(node);
+                tree.nodes.push(node);
 
                 console.log(stack);
             } else {
-                stack.push({id: ++curNodeId, type: INodeType.NODE_CHAR, content: ch});
+                const node = {id: ++curNodeId, type: INodeType.NODE_CHAR, content: ch};
+                stack.push(node);
+                tree.nodes.push(node);
                 console.log(stack);
 
-                if (prevCh == ')' || !'(|+*'.includes(prevCh)) {
-                    const top1 = stack.pop();
-                    const top2 = stack.pop();
+                if (prevCh == ')' || !'(|'.includes(prevCh)) {
+                    const top1 = stack.pop()!;
+                    const top2 = stack.pop()!;
+                    const node = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
 
-                    stack.push({id: ++curNodeId, type: INodeType.NODE_CONCAT});
+                    stack.push(node);
+                    tree.nodes.push(node);
+
+                    tree.parents[top1.id] = [node.id, true];
+                    tree.parents[top2.id] = [node.id, false];
 
                     console.log(stack);
                 }
@@ -173,9 +203,18 @@ export class TreeBuilder implements ITreeBuilder {
             prevCh = ch;
         }
 
+        let prevTop: INode | undefined = undefined;
+
         while(stack.length > 0) {
-            const top = stack.pop();
+            const top = stack.pop()!;
+
+            if (prevTop) {
+                tree.parents[prevTop.id] = [top.id, true];
+            }
+
             console.log(stack);
+
+            prevTop = top;
         }
 
         return tree;
