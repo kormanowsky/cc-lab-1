@@ -1,1 +1,1 @@
-ab|cde+f*g
+(ab|cd)ef
