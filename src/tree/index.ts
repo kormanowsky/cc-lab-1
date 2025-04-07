@@ -9,7 +9,7 @@ export class TreeBuilder implements ITreeBuilder {
         regex = regex.trim();
 
         const tree: ITree = {
-            nodes: [],
+            nodes: {},
             parents: {}
         };
 
@@ -55,7 +55,7 @@ export class TreeBuilder implements ITreeBuilder {
                     type: ch == '+' ? INodeType.NODE_ITER : INodeType.NODE_ZITER
                 };
 
-                tree.nodes.push(node);
+                tree.nodes[node.id] = node;
 
                 if (
                     prevTop && 
@@ -65,7 +65,7 @@ export class TreeBuilder implements ITreeBuilder {
                     const concatNode = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
 
                     stack.push(concatNode);
-                    tree.nodes.push(concatNode);
+                    tree.nodes[concatNode.id] = concatNode;
 
                     tree.parents[concatNode.id] = tree.parents[top.id];
                     tree.parents[node.id] = [concatNode.id, true];
@@ -96,7 +96,7 @@ export class TreeBuilder implements ITreeBuilder {
                 }
 
                 stack.push(node);
-                tree.nodes.push(node);
+                tree.nodes[node.id] = node;
             } else {
                 const node = {id: -1, type: INodeType.NODE_CHAR, content: ch};
 
@@ -107,7 +107,7 @@ export class TreeBuilder implements ITreeBuilder {
                     node.id = ++curNodeId;
 
                     stack.push(concatNode);
-                    tree.nodes.push(concatNode);
+                    tree.nodes[concatNode.id] = concatNode;
 
                     tree.parents[top.id] = [concatNode.id, false];
                     tree.parents[node.id] = [concatNode.id, true];
@@ -116,7 +116,7 @@ export class TreeBuilder implements ITreeBuilder {
                     stack.push(node);
                 }
 
-                tree.nodes.push(node);
+                tree.nodes[node.id] = node;
             }
         }
 

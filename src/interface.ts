@@ -21,9 +21,16 @@ export interface INode {
 };
 
 export interface ITree {
-    nodes: INode[];
+    nodes: Record<number, INode>;
     parents: Record<number, [number, boolean] | undefined>;
 };
+
+export interface ITreeFuncs {
+    nullable(n: number): boolean;
+    fisrtpos(n: number): Set<number>;
+    lastpos(n: number): Set<number>;
+    followpos(p: number): Set<number>;
+}
 
 export interface ITreeBuilder {
     buildTree(regex: string): Promise<ITree>;
@@ -31,4 +38,8 @@ export interface ITreeBuilder {
 
 export interface ITreePrinter {
     printTree(tree: ITree): Promise<void>;
+}
+
+export interface ITreeFuncComputer {
+    computeTreeFuncs(tree: ITree): Promise<ITreeFuncs>;
 }

@@ -1,4 +1,4 @@
-import { INode, INodeType, ITree, ITreeBuilder } from "../src/interface";
+import { INodeType, ITree, ITreeBuilder } from "../src/interface";
 import { TreeBuilder } from "../src/tree";
 
 type TreeTest = [string, ITree['nodes'], ITree['parents']];
@@ -8,17 +8,17 @@ const tests: TreeTest[] = [
         // Regular expression
         'a', 
         // Expected nodes
-        [{id: 0, type: INodeType.NODE_CHAR, content: 'a'}], 
+        {0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'}}, 
         // Expected parents
         {}
     ],
     [
         'ab',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_CONCAT}, 
-            {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_CONCAT}, 
+            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
+        },
         {
             0: [1, false], 
             2: [1, true]
@@ -26,31 +26,31 @@ const tests: TreeTest[] = [
     ],
     [
         'a+',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ITER}
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ITER}
+        },
         {
             0: [1, true]
         }
     ],
     [
         'a*',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ZITER}
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ZITER}
+        },
         {
             0: [1, true]
         }
     ],
     [
         'a|b',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ALT},
-            {id: 2, type: INodeType.NODE_CHAR, content: 'b'}
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ALT},
+            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'}
+        },
         {
             0: [1, false],
             2: [1, true]
@@ -58,13 +58,13 @@ const tests: TreeTest[] = [
     ],
     [
         '(a|b)c',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ALT},
-            {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
-            {id: 3, type: INodeType.NODE_CONCAT},
-            {id: 4, type: INodeType.NODE_CHAR, content: 'c'}
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ALT},
+            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
+            3: {id: 3, type: INodeType.NODE_CONCAT},
+            4: {id: 4, type: INodeType.NODE_CHAR, content: 'c'}
+        },
         {
             0: [1, false],
             2: [1, true],
@@ -74,12 +74,12 @@ const tests: TreeTest[] = [
     ],
     [
         'a+|b',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ITER},
-            {id: 2, type: INodeType.NODE_ALT},
-            {id: 3, type: INodeType.NODE_CHAR, content: 'b'},
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ITER},
+            2: {id: 2, type: INodeType.NODE_ALT},
+            3: {id: 3, type: INodeType.NODE_CHAR, content: 'b'},
+        },
         {
             0: [1, true],
             1: [2, false],
@@ -88,13 +88,13 @@ const tests: TreeTest[] = [
     ],
     [
         'a+b+',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ITER},
-            {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
-            {id: 3, type: INodeType.NODE_ITER},
-            {id: 4, type: INodeType.NODE_CONCAT},
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ITER},
+            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
+            3: {id: 3, type: INodeType.NODE_ITER},
+            4: {id: 4, type: INodeType.NODE_CONCAT},
+        },
         {
             0: [1, true],
             1: [4, false],
@@ -104,12 +104,12 @@ const tests: TreeTest[] = [
     ],
     [
         'a|b*',
-        [
-            {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
-            {id: 1, type: INodeType.NODE_ALT},
-            {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
-            {id: 3, type: INodeType.NODE_ZITER},
-        ],
+        {
+            0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
+            1: {id: 1, type: INodeType.NODE_ALT},
+            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
+            3: {id: 3, type: INodeType.NODE_ZITER},
+        },
         {
             0: [1, false],
             2: [3, true],
