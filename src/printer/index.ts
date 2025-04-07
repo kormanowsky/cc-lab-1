@@ -12,7 +12,7 @@ export class DotFilePrinter implements ITreePrinter {
 
         await file.write("digraph G {\n");
 
-        for(const node of tree.nodes) {
+        for(const node of Object.values(tree.nodes)) {
             const nodeLabels = {
                 [INodeType.NODE_ALT]: "|",
                 [INodeType.NODE_CONCAT]: "@",

@@ -26,10 +26,10 @@ export interface ITree {
 };
 
 export interface ITreeFuncs {
-    nullable(n: number): boolean;
-    fisrtpos(n: number): Set<number>;
-    lastpos(n: number): Set<number>;
-    followpos(p: number): Set<number>;
+    nullable: Record<number, boolean>;
+    firstpos: Record<number, Set<number>>;
+    lastpos: Record<number, Set<number>>;
+    followpos: Record<number, Set<number>>;
 }
 
 export interface ITreeBuilder {
