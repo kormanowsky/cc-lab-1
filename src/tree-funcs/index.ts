@@ -31,9 +31,36 @@ export class TreeFuncComputer implements ITreeFuncComputer {
             }
         }
 
+        const firstpos: ITreeFuncs['firstpos'] = {};
+
+        for(const [id, node] of Object.entries(tree.nodes)) {
+            firstpos[id] = new Set<number>();
+
+            if (node.type === INodeType.NODE_CHAR) {
+                firstpos[id].add(id);
+            }
+
+            const parentNode = tree.nodes[tree.parents[id]?.[0]];
+
+            if (parentNode) {
+                const parentNodeFirstpos = firstpos[parentNode.id] ?? new Set<number>();
+
+                if (
+                    parentNode.type === INodeType.NODE_ALT ||
+                    parentNode.type === INodeType.NODE_ITER || 
+                    parentNode.type === INodeType.NODE_ZITER
+                ) {
+                    firstpos[parentNode.id] = new Set<number>([...parentNodeFirstpos, ...firstpos[id]]);
+                } else if (tree.parents[id]![1]) {
+                    // TODO: fix
+                    firstpos[parentNode.id] = new Set<number>([...firstpos[id]]);
+                }
+            }
+        }
+
         return {
             nullable,
-            firstpos: {},
+            firstpos,
             lastpos: {},
             followpos: {}
         }
