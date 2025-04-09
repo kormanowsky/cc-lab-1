@@ -47,8 +47,9 @@ export interface ITreeBuilder {
     buildTree(regex: string): Promise<ITree>;
 };
 
-export interface ITreePrinter {
+export interface IPrinter {
     printTree(tree: ITree): Promise<void>;
+    printFSM(fsm: IFSM): Promise<void>;
 }
 
 export interface ITreeFuncComputer {

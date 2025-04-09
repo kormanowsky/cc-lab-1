@@ -1,8 +1,8 @@
 import fsP from "fs/promises";
 
-import { INodeType, ITree, ITreePrinter } from "../interface";
+import { INodeType, ITree, IPrinter, IFSM } from "../interface";
 
-export class DotFilePrinter implements ITreePrinter {
+export class DotFilePrinter implements IPrinter {
     constructor(filePath: string) {
         this.filePromise = fsP.open(filePath, "w");
     }
@@ -33,6 +33,26 @@ export class DotFilePrinter implements ITreePrinter {
                 const [parentId, isRight] = parent;
 
                 await file.write(`node_${parentId} -> node_${childId} [color=${isRight?'red': 'blue'}];\n`);
+            }
+        }
+
+        await file.write("}\n");
+
+        await file.close();
+    }
+
+    async printFSM(fsm: IFSM): Promise<void> {
+        const file = await this.filePromise;
+
+        await file.write("digraph G {\n");
+
+        for(const state of fsm.states) {
+            await file.write(`state_${state.id} [shape=circle style=filled label="${[...state.positions]}"];\n`);
+        }
+
+        for(const [sourceStateId, transitions] of Object.entries(fsm.transitionFunction)) {
+            for(const [sym, targetStateId] of Object.entries(transitions)) {
+                await file.write(`state_${sourceStateId} -> state_${targetStateId} [label="${sym}"];\n`)
             }
         }
 

@@ -7,7 +7,8 @@ import { TreeFuncComputer } from "./tree-funcs";
 async function main() {
     const reader = new FileReader('./examples/regex.txt');
     const builder = new TreeBuilder();
-    const printer = new DotFilePrinter('./result.dot');
+    const printer = new DotFilePrinter('./tree.dot');
+    const printer2 = new DotFilePrinter('./fsm.dot');
     const computer = new TreeFuncComputer();
     const fsmBuilder = new FSMBuilder();
 
@@ -17,13 +18,7 @@ async function main() {
     const fsm = await fsmBuilder.buildFSM(tree, funcs, "ab");
 
     await printer.printTree(tree);
-
-    console.log(funcs);
-    console.log(fsm);
-
-    for(const s of fsm.states) {
-        console.log(s.id, [...s.positions]);
-    }
+    await printer2.printFSM(fsm);
 }
 
 main();
