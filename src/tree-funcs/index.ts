@@ -3,57 +3,63 @@ import { INodeType, ITree, ITreeFuncComputer, ITreeFuncs } from "../interface";
 export class TreeFuncComputer implements ITreeFuncComputer {
     async computeTreeFuncs(tree: ITree): Promise<ITreeFuncs> {
         // TODO: real functions
-
         const nullable: ITreeFuncs['nullable'] = {};
+        const firstpos: ITreeFuncs['firstpos'] = {};
+        const lastpos: ITreeFuncs['lastpos'] = {};
 
-        for(const [id, node] of Object.entries(tree.nodes)) {
-            nullable[id] = nullable[id] ?? false;
+        const orderedNodeIds: number[] = [];
+        const children: Record<number, Record<'l'|'r', number|undefined>> = {};
 
-            if (
-                node.type === INodeType.NODE_CHAR && node.content === 'eps' || 
-                node.type === INodeType.NODE_ZITER
-            ) {
-                nullable[id] = true;
+        for(const id of Object.keys(tree.nodes)) {
+            if (children[id] == null) {
+                children[id] = {l: undefined, r: undefined};
             }
 
-            const parentNode = tree.nodes[tree.parents[id]?.[0]];
-
-            if (parentNode) {
-                const parentNodeNullable = nullable[parentNode.id];
-
-                if (parentNode.type === INodeType.NODE_ALT) {
-                    nullable[parentNode.id] = (parentNodeNullable ?? false) || nullable[id];
-                } else if (parentNode.type === INodeType.NODE_ITER) {
-                    nullable[parentNode.id] = nullable[id];
-                } else if (parentNode.type === INodeType.NODE_CONCAT) {
-                    nullable[parentNode.id] = (parentNodeNullable ?? true) && nullable[id];
+            if (tree.parents[id] == null) {
+                orderedNodeIds.push(<number><unknown>id);
+            } else {
+                const [parentId, isRight] = tree.parents[id];
+                const parentIndex = orderedNodeIds.indexOf(parentId.toString());
+                if (parentIndex === -1) {
+                    orderedNodeIds.push(<number><unknown>id);
+                } else {
+                    orderedNodeIds.splice(parentIndex, 0, <number><unknown>id);
                 }
+
+                if (children[parentId] == null) {
+                    children[parentId] = {l: undefined, r: undefined};
+                }
+
+                children[parentId][isRight ? 'r' : 'l'] = <number><unknown>id;
             }
         }
 
-        const firstpos: ITreeFuncs['firstpos'] = {};
-
-        for(const [id, node] of Object.entries(tree.nodes)) {
-            firstpos[id] = new Set<number>();
+        for(const id of orderedNodeIds) {
+            const {l, r} = children[id];
+            const node = tree.nodes[id];
 
             if (node.type === INodeType.NODE_CHAR) {
-                firstpos[id].add(id);
-            }
-
-            const parentNode = tree.nodes[tree.parents[id]?.[0]];
-
-            if (parentNode) {
-                const parentNodeFirstpos = firstpos[parentNode.id] ?? new Set<number>();
-
-                if (
-                    parentNode.type === INodeType.NODE_ALT ||
-                    parentNode.type === INodeType.NODE_ITER || 
-                    parentNode.type === INodeType.NODE_ZITER
-                ) {
-                    firstpos[parentNode.id] = new Set<number>([...parentNodeFirstpos, ...firstpos[id]]);
-                } else if (tree.parents[id]![1]) {
-                    // TODO: fix
-                    firstpos[parentNode.id] = new Set<number>([...firstpos[id]]);
+                const isEps = node.content === 'eps';
+                nullable[id] = isEps;
+                firstpos[id] = new Set<number>();
+                if (!isEps) {
+                    firstpos[id].add(id);
+                }
+            } else if (node.type === INodeType.NODE_ZITER) {
+                nullable[id] = true;
+                firstpos[id] = new Set<number>([...firstpos[r!]]);
+            } else if (node.type === INodeType.NODE_ITER) {
+                nullable[id] = nullable[r!];
+                firstpos[id] = new Set<number>([...firstpos[r!]]);
+            } else if (node.type === INodeType.NODE_ALT) {
+                nullable[id] = nullable[l!] || nullable[r!];
+                firstpos[id] = new Set<number>([...firstpos[l!], ...firstpos[r!]]);
+            } else if (node.type === INodeType.NODE_CONCAT) {
+                nullable[id] = nullable[l!] && nullable[r!];
+                if (nullable[l!]) {
+                    firstpos[id] = new Set<number>([...firstpos[l!], ...firstpos[r!]]);
+                } else {
+                    firstpos[id] = new Set<number>([...firstpos[l!]]);
                 }
             }
         }
@@ -61,7 +67,7 @@ export class TreeFuncComputer implements ITreeFuncComputer {
         return {
             nullable,
             firstpos,
-            lastpos: {},
+            lastpos,
             followpos: {}
         }
     }
