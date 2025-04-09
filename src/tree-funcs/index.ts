@@ -42,24 +42,36 @@ export class TreeFuncComputer implements ITreeFuncComputer {
                 const isEps = node.content === 'eps';
                 nullable[id] = isEps;
                 firstpos[id] = new Set<number>();
+                lastpos[id] = new Set<number>();
                 if (!isEps) {
                     firstpos[id].add(id);
+                    lastpos[id].add(id);
                 }
             } else if (node.type === INodeType.NODE_ZITER) {
                 nullable[id] = true;
                 firstpos[id] = new Set<number>([...firstpos[r!]]);
+                lastpos[id] = new Set<number>([...lastpos[r!]]);
             } else if (node.type === INodeType.NODE_ITER) {
                 nullable[id] = nullable[r!];
                 firstpos[id] = new Set<number>([...firstpos[r!]]);
+                lastpos[id] = new Set<number>([...lastpos[r!]]);
             } else if (node.type === INodeType.NODE_ALT) {
                 nullable[id] = nullable[l!] || nullable[r!];
                 firstpos[id] = new Set<number>([...firstpos[l!], ...firstpos[r!]]);
+                lastpos[id] = new Set<number>([...lastpos[l!], ...lastpos[r!]]);
             } else if (node.type === INodeType.NODE_CONCAT) {
                 nullable[id] = nullable[l!] && nullable[r!];
+
                 if (nullable[l!]) {
                     firstpos[id] = new Set<number>([...firstpos[l!], ...firstpos[r!]]);
                 } else {
                     firstpos[id] = new Set<number>([...firstpos[l!]]);
+                }
+
+                if (nullable[r!]) {
+                    lastpos[id] = new Set<number>([...lastpos[l!], ...lastpos[r!]]);
+                } else {
+                    lastpos[id] = new Set<number>([...lastpos[r!]]);
                 }
             }
         }
