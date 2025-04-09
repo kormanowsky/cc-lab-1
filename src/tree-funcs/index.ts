@@ -2,7 +2,6 @@ import { INodeType, ITree, ITreeFuncComputer, ITreeFuncs } from "../interface";
 
 export class TreeFuncComputer implements ITreeFuncComputer {
     async computeTreeFuncs(tree: ITree): Promise<ITreeFuncs> {
-        // TODO: real functions
         const nullable: ITreeFuncs['nullable'] = {};
         const firstpos: ITreeFuncs['firstpos'] = {};
         const lastpos: ITreeFuncs['lastpos'] = {};
@@ -115,7 +114,8 @@ export class TreeFuncComputer implements ITreeFuncComputer {
             nullable,
             firstpos,
             lastpos,
-            followpos
+            followpos,
+            root: orderedNodeIds.at(-1)!
         }
     }
 }

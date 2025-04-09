@@ -30,6 +30,7 @@ export interface ITreeFuncs {
     firstpos: Record<number, Set<number>>;
     lastpos: Record<number, Set<number>>;
     followpos: Record<number, Set<number>>;
+    root: number;
 }
 
 export interface ITreeBuilder {
