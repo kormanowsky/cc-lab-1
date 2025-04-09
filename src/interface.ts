@@ -33,6 +33,16 @@ export interface ITreeFuncs {
     root: number;
 }
 
+export interface IFSMState {
+    id: number;
+    positions: Set<number>;
+}
+
+export interface IFSM {
+    states: Array<IFSMState>;
+    transitionFunction: Record<number, Record<string, number>>;
+}
+
 export interface ITreeBuilder {
     buildTree(regex: string): Promise<ITree>;
 };
@@ -43,4 +53,8 @@ export interface ITreePrinter {
 
 export interface ITreeFuncComputer {
     computeTreeFuncs(tree: ITree): Promise<ITreeFuncs>;
+}
+
+export interface IFiniteStateMachineBuilder {
+    buildFSM(tree: ITree, funcs: ITreeFuncs, alphabet: string): Promise<IFSM>;
 }
