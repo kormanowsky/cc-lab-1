@@ -41,6 +41,9 @@ export interface IFSMState {
 export interface IFSM {
     states: Array<IFSMState>;
     transitionFunction: Record<number, Record<string, number>>;
+    initialState: number;
+    finalStates: number[];
+    alphabet: string;
 }
 
 export interface ITreeBuilder {

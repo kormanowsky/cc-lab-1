@@ -13,7 +13,7 @@ async function main() {
     const fsmBuilder = new FSMBuilder();
 
     const regex = await reader.readRegex();
-    const tree = await builder.buildTree(regex);
+    const tree = await builder.buildTree(regex + "#");
     const funcs = await computer.computeTreeFuncs(tree);
     const fsm = await fsmBuilder.buildFSM(tree, funcs, "ab");
 
