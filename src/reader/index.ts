@@ -9,7 +9,7 @@ export class FileReader implements IRegexReader {
     async readRegex(): Promise<string> {
         const file = await this.filePromise;
         
-        return file.readFile({encoding: 'utf-8'});
+        return (await file.readFile({encoding: 'utf-8'})).trim();
 
     }
 

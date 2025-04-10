@@ -9,6 +9,8 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
 
         states.push({id: ++stateId, positions: new Set<number>([...funcs.firstpos[funcs.root]])});
 
+        const initialState = stateId;
+        const finalStates: number[] = [];
         const unmarkedStates = [states[0]];
 
         while(unmarkedStates.length > 0) {
@@ -41,6 +43,14 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                     states.push(newSt);
                     unmarkedStates.push(newSt);
 
+                    for(const pos of newSt.positions) {
+                        const node = tree.nodes[pos];
+                        console.log(pos, node);
+                        if (node.type === INodeType.NODE_CHAR && node.content === "#") {
+                            finalStates.push(newSt.id);
+                        }
+                    }
+
                     id = stateId;
                 }
 
@@ -50,7 +60,10 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
 
         return {
             states,
-            transitionFunction
+            transitionFunction,
+            initialState,
+            finalStates,
+            alphabet
         };
     }
 

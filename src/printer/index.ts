@@ -46,8 +46,12 @@ export class DotFilePrinter implements IPrinter {
 
         await file.write("digraph G {\n");
 
+        await file.write('state_fake [label="",shape=none,height=.0,width=.0];\n');
+
         for(const state of fsm.states) {
-            await file.write(`state_${state.id} [shape=circle style=filled label="${[...state.positions]}"];\n`);
+            const shape = fsm.finalStates.includes(state.id) ? "doublecircle" : "circle";
+
+            await file.write(`state_${state.id} [shape=${shape} style=filled label="${[...state.positions]}"];\n`);
         }
 
         for(const [sourceStateId, transitions] of Object.entries(fsm.transitionFunction)) {
@@ -55,6 +59,8 @@ export class DotFilePrinter implements IPrinter {
                 await file.write(`state_${sourceStateId} -> state_${targetStateId} [label="${sym}"];\n`)
             }
         }
+
+        await file.write(`state_fake -> state_${fsm.initialState};\n`);
 
         await file.write("}\n");
 
