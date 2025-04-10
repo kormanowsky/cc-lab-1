@@ -71,9 +71,9 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         const {states, finalStates, transitionFunction: d, alphabet: S} = fsm;
         const Q = new Set<number>(states.map((s) => s.id));
         const F = new Set<number>(finalStates);
-        const P = [Q, this.setDifference(Q, F)];
+        const P = [F, this.setDifference(Q, F)];
         const Class: Record<number, number> = {};
-        for(const q of Q) {
+        for(const q of F) {
             Class[q] = 0;
         }
         for(const q of this.setDifference(Q, F)) {
