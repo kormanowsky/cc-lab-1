@@ -19,6 +19,8 @@ async function main() {
 
     await printer.printTree(tree);
     await printer2.printFSM(fsm);
+
+    await fsmBuilder.buildMinifiedFsm(fsm);
 }
 
 main();

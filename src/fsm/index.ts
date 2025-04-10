@@ -1,4 +1,4 @@
-import { IFiniteStateMachineBuilder, IFSM, INodeType, ITree, ITreeFuncs } from "../interface";
+import { IFiniteStateMachineBuilder, IFSM, IFSMState, INodeType, ITree, ITreeFuncs } from "../interface";
 
 export class FSMBuilder implements IFiniteStateMachineBuilder {
     async buildFSM(tree: ITree, funcs: ITreeFuncs, alphabet: string = "abcdefghijklmnopqrstuvwxyz"): Promise<IFSM> {
@@ -67,6 +67,90 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         };
     }
 
+    async buildMinifiedFsm(fsm: IFSM): Promise<IFSM> {
+        const {states, finalStates, transitionFunction: d, alphabet: S} = fsm;
+        const Q = new Set<number>(states.map((s) => s.id));
+        const F = new Set<number>(finalStates);
+        const P = [Q, this.setDifference(Q, F)];
+        const Class: Record<number, number> = {};
+        for(const q of Q) {
+            Class[q] = 0;
+        }
+        for(const q of this.setDifference(Q, F)) {
+            Class[q] = 1;
+        }
+        const Inv: Record<number, Record<string, number[]>> = {};
+
+        for(const [sourceState, transitions] of Object.entries(d)) {
+            for(const [sym, targetState] of Object.entries(transitions)) {
+                if (Inv[targetState] == null) {
+                    Inv[targetState] = {};
+                }
+                if (Inv[targetState][sym] == null) {
+                    Inv[targetState][sym] = [];
+                }
+                Inv[targetState][sym].push(<number><unknown>sourceState);
+            }
+        }
+
+        console.log(Inv);
+
+
+        const Queue: Array<[Set<number>, string]> = [];
+
+        for(const c of S) {
+            Queue.push([F, c]);
+            Queue.push([this.setDifference(Q, F), c]);
+        }
+
+        while(Queue.length > 0) {
+            const [C, a] = Queue[0];
+            Queue.splice(0, 1);
+            const Involved = {};
+
+            for (const q of C) {
+                for (const r of Inv[q][a] ?? []) {
+                    const i = Class[r];
+                    if (Involved[i] == null) {
+                        Involved[i] = [];
+                    }
+                    Involved[i].push(r);
+                }
+            }
+
+            for (const i of Object.keys(Involved)) {
+                if (Involved[i].length < P[i].length) {
+                    const j = P.push(new Set<number>()) - 1;
+                    for(const r of Involved[i]) {
+                        P[i].delete(r);
+                        P[j].add(r);
+                    }
+
+                    if (P[j].size > P[i].size) {
+                        const tmp = P[i];
+                        P[i] = P[j];
+                        P[j] = tmp;
+                    }
+
+                    for(const r of P[j]) {
+                        Class[r] = j;
+                    }
+
+                    for(const c of S) {
+                        Queue.push([P[j], c]);
+                    }
+                }
+            }
+        }
+
+        console.log(P);
+        
+        // TODO:
+        return {
+            ...fsm
+        }
+    }
+
     protected setsEqual<T = number>(a: Set<T>, b: Set<T>): boolean {
         for(const aEl of a) {
             if (!b.has(aEl)) {
@@ -81,5 +165,26 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         }
 
         return true;
+    }
+
+    protected setDifference<T = number>(a: Set<T>, b: Set<T>, eq: (x: T, y: T) => boolean = (x, y) => x === y): Set<T> {
+        const result: Set<T> = new Set<T>();
+
+        for(const aEl of a) {
+            let isInB: boolean = false;
+
+            for(const bEl of b) {
+                if (eq(aEl, bEl)) {
+                    isInB = true;
+                    break;
+                }
+            }
+
+            if (!isInB) {
+                result.add(aEl);
+            }
+        }
+
+        return result;
     }
 }
