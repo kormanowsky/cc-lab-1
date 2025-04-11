@@ -1,0 +1,1 @@
+a|bab|aba|bab|b|aba((((((((a|b)a*b)ab)ab)))))
