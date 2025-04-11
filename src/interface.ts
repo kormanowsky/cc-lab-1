@@ -1,6 +1,5 @@
-import { exitCode } from "process";
-
-export interface IRegexReader {
+export interface IReader {
+    readString(): Promise<string>;
     readRegex(): Promise<string>;
 };
 
