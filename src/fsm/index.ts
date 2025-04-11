@@ -145,7 +145,6 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
 
         const minTransitionFunction: IFSM['transitionFunction'] = {};
 
-        // TODO: transition function
         for(const sourceState of minStates) {
             for (const targetState of minStates) {
                 const sId = sourceState.id;
