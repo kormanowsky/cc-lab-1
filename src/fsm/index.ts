@@ -37,7 +37,9 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                     }
                 }
 
-                if (id == -1) {
+                console.log(40, id, u);
+
+                if (id === -1) {
                     const newSt = {id: ++stateId, positions: u};
 
                     states.push(newSt);
@@ -45,7 +47,6 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
 
                     for(const pos of newSt.positions) {
                         const node = tree.nodes[pos];
-                        console.log(pos, node);
                         if (node.type === INodeType.NODE_CHAR && node.content === "#") {
                             finalStates.push(newSt.id);
                         }
@@ -89,12 +90,9 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                 if (Inv[targetState][sym] == null) {
                     Inv[targetState][sym] = [];
                 }
-                Inv[targetState][sym].push(<number><unknown>sourceState);
+                Inv[targetState][sym].push(parseInt(sourceState));
             }
         }
-
-        console.log(Inv);
-
 
         const Queue: Array<[Set<number>, string]> = [];
 
@@ -106,10 +104,10 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         while(Queue.length > 0) {
             const [C, a] = Queue[0];
             Queue.splice(0, 1);
-            const Involved = {};
+            const Involved: Record<number, number[]> = {};
 
             for (const q of C) {
-                for (const r of Inv[q][a] ?? []) {
+                for (const r of Inv[q]?.[a] ?? []) {
                     const i = Class[r];
                     if (Involved[i] == null) {
                         Involved[i] = [];
@@ -119,7 +117,7 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
             }
 
             for (const i of Object.keys(Involved)) {
-                if (Involved[i].length < P[i].length) {
+                if (Involved[i].length < P[i].size) {
                     const j = P.push(new Set<number>()) - 1;
                     for(const r of Involved[i]) {
                         P[i].delete(r);
@@ -143,7 +141,7 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
             }
         }
 
-        console.log(P);
+        console.log(P, Class, Queue);
         
         // TODO:
         return {

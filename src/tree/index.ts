@@ -43,7 +43,15 @@ export class TreeBuilder implements ITreeBuilder {
 
                 stack.pop();
 
-                if (top) {
+                prevTop = stack.pop();
+
+                if (top && prevTop && prevTop.type !== INodeType.NODE_ALT) {
+                    const node = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
+                    tree.nodes[node.id] = node;
+                    tree.parents[top.id] = [node.id, true];
+                    tree.parents[prevTop.id] = [node.id, false];
+                    stack.push(node);
+                } else if (top) {
                     stack.push(top);
                 }
             } else if (ch == '+' || ch == '*') {
