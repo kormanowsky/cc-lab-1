@@ -31,7 +31,7 @@ const tests: TreeTest[] = [
             1: {id: 1, type: INodeType.NODE_ITER}
         },
         {
-            0: [1, true]
+            0: [1, false]
         }
     ],
     [
@@ -41,7 +41,7 @@ const tests: TreeTest[] = [
             1: {id: 1, type: INodeType.NODE_ZITER}
         },
         {
-            0: [1, true]
+            0: [1, false]
         }
     ],
     [
@@ -81,7 +81,7 @@ const tests: TreeTest[] = [
             3: {id: 3, type: INodeType.NODE_CHAR, content: 'b'},
         },
         {
-            0: [1, true],
+            0: [1, false],
             1: [2, false],
             3: [2, true],
         }
@@ -91,15 +91,15 @@ const tests: TreeTest[] = [
         {
             0: {id: 0, type: INodeType.NODE_CHAR, content: 'a'},
             1: {id: 1, type: INodeType.NODE_ITER},
-            2: {id: 2, type: INodeType.NODE_CHAR, content: 'b'},
-            3: {id: 3, type: INodeType.NODE_ITER},
-            4: {id: 4, type: INodeType.NODE_CONCAT},
+            2: {id: 2, type: INodeType.NODE_CONCAT},
+            3: {id: 3, type: INodeType.NODE_CHAR, content: 'b'},
+            4: {id: 4, type: INodeType.NODE_ITER},
         },
         {
-            0: [1, true],
-            1: [4, false],
-            2: [3, true],
-            3: [4, true],
+            0: [1, false],
+            1: [2, false],
+            4: [2, true],
+            3: [4, false],
         }
     ],
     [
@@ -112,7 +112,7 @@ const tests: TreeTest[] = [
         },
         {
             0: [1, false],
-            2: [3, true],
+            2: [3, false],
             3: [1, true],
         }
     ]

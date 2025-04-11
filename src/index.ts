@@ -14,7 +14,7 @@ async function main() {
     const fsmBuilder = new FSMBuilder();
 
     const regex = await reader.readRegex();
-    const tree = await builder.buildTree(regex + "#");
+    const tree = await builder.buildTree(`(${regex})#`);
 
     await printer.printTree(tree);
 
