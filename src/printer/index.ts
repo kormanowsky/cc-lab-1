@@ -51,7 +51,7 @@ export class DotFilePrinter implements IPrinter {
         for(const state of fsm.states) {
             const shape = fsm.finalStates.includes(state.id) ? "doublecircle" : "circle";
 
-            await file.write(`state_${state.id} [shape=${shape} style=filled label="${[...state.positions]}"];\n`);
+            await file.write(`state_${state.id} [shape=${shape} style=filled label="${state.id}\n${[...state.positions]}"];\n`);
         }
 
         for(const [sourceStateId, transitions] of Object.entries(fsm.transitionFunction)) {

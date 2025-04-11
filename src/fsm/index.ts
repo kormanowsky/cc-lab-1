@@ -13,6 +13,13 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         const finalStates: number[] = [];
         const unmarkedStates = [states[0]];
 
+        for(const pos of states[0].positions) {
+            const node = tree.nodes[pos];
+            if (node.type === INodeType.NODE_CHAR && node.content === "#") {
+                finalStates.push(states[0].id);
+            }
+        }
+
         while(unmarkedStates.length > 0) {
             const s = unmarkedStates.pop()!;
 
@@ -66,7 +73,12 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
         };
     }
 
-    async buildMinifiedFsm(fsm: IFSM): Promise<IFSM> {
+    async buildMinifiedFSM(fsm: IFSM): Promise<IFSM> {
+        if (fsm.states.length <= 1) {
+            // Nothing to minimize
+            return {...fsm};
+        }
+
         const {states, finalStates, transitionFunction: d, alphabet: S} = fsm;
         const Q = new Set<number>(states.map((s) => s.id));
         const F = new Set<number>(finalStates);
@@ -157,7 +169,7 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                 }
 
                 for(const a of fsm.alphabet) {
-                    if (sPos.some(p => tPos.includes(fsm.transitionFunction[p]?.[a] ?? -1))) {
+                    if (sPos.some(p => tPos.includes(d[p]?.[a] ?? -1))) {
                         minTransitionFunction[sId][a] = tId;
                     }
                 }
