@@ -23,7 +23,7 @@ async function main() {
 
     await printer2.printFSM(fsm);
 
-    const minFsm = await fsmBuilder.buildMinifiedFsm(fsm);
+    const minFsm = await fsmBuilder.buildMinifiedFSM(fsm);
 
     await printer3.printFSM(minFsm);
 }
