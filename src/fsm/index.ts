@@ -1,4 +1,4 @@
-import { IFiniteStateMachineBuilder, IFSM, IFSMState, INodeType, ITree, ITreeFuncs } from "../interface";
+import { IFiniteStateMachineBuilder, IFSM, INodeType, ITree, ITreeFuncs } from "../interface";
 
 export class FSMBuilder implements IFiniteStateMachineBuilder {
     async buildFSM(tree: ITree, funcs: ITreeFuncs, alphabet: string = "abcdefghijklmnopqrstuvwxyz"): Promise<IFSM> {
