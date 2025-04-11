@@ -46,6 +46,12 @@ export interface IFSM {
     alphabet: string;
 }
 
+export interface IFSMSimResult {
+    accepted: boolean;
+    error?: Error;
+    steps: Array<{id: number; curStateId: number; char: string; isInitial: boolean; isFinal: boolean}>;
+}
+
 export interface ITreeBuilder {
     buildTree(regex: string): Promise<ITree>;
 };
@@ -61,4 +67,9 @@ export interface ITreeFuncComputer {
 
 export interface IFiniteStateMachineBuilder {
     buildFSM(tree: ITree, funcs: ITreeFuncs, alphabet: string): Promise<IFSM>;
+    buildMinifiedFSM(fsm: IFSM): Promise<IFSM>;
+}
+
+export interface IFiniteStateMachineSimulator {
+    simulateFSM(fsm: IFSM, input: string): Promise<IFSMSimResult>;
 }
