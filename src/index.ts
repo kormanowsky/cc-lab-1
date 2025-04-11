@@ -9,6 +9,7 @@ async function main() {
     const builder = new TreeBuilder();
     const printer = new DotFilePrinter('./tree.dot');
     const printer2 = new DotFilePrinter('./fsm.dot');
+    const printer3 = new DotFilePrinter('./min-fsm.dot');
     const computer = new TreeFuncComputer();
     const fsmBuilder = new FSMBuilder();
 
@@ -22,7 +23,9 @@ async function main() {
 
     await printer2.printFSM(fsm);
 
-    await fsmBuilder.buildMinifiedFsm(fsm);
+    const minFsm = await fsmBuilder.buildMinifiedFsm(fsm);
+
+    await printer3.printFSM(minFsm);
 }
 
 main();

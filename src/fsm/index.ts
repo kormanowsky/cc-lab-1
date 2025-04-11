@@ -138,12 +138,39 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                 }
             }
         }
-
-        console.log(P, Class);
         
-        // TODO:
+        const minStates = P.map((el, i) => ({id: i, positions: el}));
+        const minFinalStates = minStates.filter((el) => this.setIntersection(el.positions, new Set<number>(fsm.finalStates)).size > 0);
+        const minInitialStates = minStates.filter((el) => this.setIntersection(el.positions, new Set<number>([fsm.initialState])).size > 0);
+
+        const minTransitionFunction: IFSM['transitionFunction'] = {};
+
+        // TODO: transition function
+        for(const sourceState of minStates) {
+            for (const targetState of minStates) {
+                const sId = sourceState.id;
+                const sPos = [...sourceState.positions];
+                const tId = targetState.id;
+                const tPos = [...targetState.positions];
+
+                if (minTransitionFunction[sId] == null) {
+                    minTransitionFunction[sId] = {};
+                }
+
+                for(const a of fsm.alphabet) {
+                    if (sPos.some(p => tPos.includes(fsm.transitionFunction[p]?.[a] ?? -1))) {
+                        minTransitionFunction[sId][a] = tId;
+                    }
+                }
+            }
+        }
+        
         return {
-            ...fsm
+            alphabet: fsm.alphabet,
+            states: minStates,
+            finalStates: minFinalStates.map(el => el.id),
+            initialState: minInitialStates[0]?.id,
+            transitionFunction: minTransitionFunction
         }
     }
 
@@ -177,6 +204,18 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
             }
 
             if (!isInB) {
+                result.add(aEl);
+            }
+        }
+
+        return result;
+    }
+
+    protected setIntersection<T = number>(a: Set<T>, b: Set<T>): Set<T> {
+        const result = new Set<T>();
+
+        for(const aEl of a) {
+            if (b.has(aEl)) {
                 result.add(aEl);
             }
         }
