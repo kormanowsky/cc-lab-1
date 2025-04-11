@@ -23,7 +23,7 @@ export class DotFilePrinter implements IPrinter {
 
             const nodeLabel = nodeLabels[node.type] ?? node.content ?? `node_${node.id}`;
 
-            await file.write(`node_${node.id} [shape=circle style=filled label="${nodeLabel}"];\n`);
+            await file.write(`node_${node.id} [shape=circle style=filled label="${node.id}\n${nodeLabel}"];\n`);
         }
 
         for(const entry of Object.entries(tree.parents)) {
