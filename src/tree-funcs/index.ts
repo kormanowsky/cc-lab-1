@@ -9,28 +9,41 @@ export class TreeFuncComputer implements ITreeFuncComputer {
 
         const orderedNodeIds: number[] = [];
         const children: Record<number, Record<'l'|'r', number|undefined>> = {};
+        let root: number = -1;
 
         for(const id of Object.keys(tree.nodes)) {
+            const iid = parseInt(id);
+
             if (children[id] == null) {
                 children[id] = {l: undefined, r: undefined};
             }
 
-            if (tree.parents[id] == null) {
-                orderedNodeIds.push(<number><unknown>id);
-            } else {
+            if (tree.parents[id] != null) {
                 const [parentId, isRight] = tree.parents[id];
-                const parentIndex = orderedNodeIds.indexOf(parentId.toString());
-                if (parentIndex === -1) {
-                    orderedNodeIds.push(<number><unknown>id);
-                } else {
-                    orderedNodeIds.splice(parentIndex, 0, <number><unknown>id);
-                }
 
                 if (children[parentId] == null) {
                     children[parentId] = {l: undefined, r: undefined};
                 }
 
-                children[parentId][isRight ? 'r' : 'l'] = <number><unknown>id;
+                children[parentId][isRight ? 'r' : 'l'] = iid;
+            } else {
+                root = iid;
+            }
+        }
+
+        const q = [root];
+
+        while (q.length > 0) {
+            const top = q.pop()!;
+            const {l, r} = children[top];
+            orderedNodeIds.unshift(top);
+
+            if (l != null) {
+                q.push(l);
+            }
+
+            if (r != null) {
+                q.push(r);
             }
         }
 
@@ -50,8 +63,8 @@ export class TreeFuncComputer implements ITreeFuncComputer {
 
             } else if (node.type === INodeType.NODE_ZITER) {
                 nullable[id] = true;
-                firstpos[id] = new Set<number>([...firstpos[r!]]);
-                lastpos[id] = new Set<number>([...lastpos[r!]]);
+                firstpos[id] = new Set<number>([...firstpos[l!]]);
+                lastpos[id] = new Set<number>([...lastpos[l!]]);
 
                 for (const pos of lastpos[id]) {
                     if (followpos[pos] == null) {
@@ -64,9 +77,9 @@ export class TreeFuncComputer implements ITreeFuncComputer {
                 }
 
             } else if (node.type === INodeType.NODE_ITER) {
-                nullable[id] = nullable[r!];
-                firstpos[id] = new Set<number>([...firstpos[r!]]);
-                lastpos[id] = new Set<number>([...lastpos[r!]]);
+                nullable[id] = nullable[l!];
+                firstpos[id] = new Set<number>([...firstpos[l!]]);
+                lastpos[id] = new Set<number>([...lastpos[l!]]);
 
                 for (const pos of lastpos[id]) {
                     if (followpos[pos] == null) {
@@ -115,7 +128,7 @@ export class TreeFuncComputer implements ITreeFuncComputer {
             firstpos,
             lastpos,
             followpos,
-            root: orderedNodeIds.at(-1)!
+            root
         }
     }
 }

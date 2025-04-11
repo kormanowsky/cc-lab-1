@@ -45,14 +45,19 @@ export class TreeBuilder implements ITreeBuilder {
 
                 prevTop = stack.pop();
 
-                if (top && prevTop && prevTop.type !== INodeType.NODE_ALT) {
+                if (top && prevTop && prevTop.type !== INodeType.NODE_ALT && !'+*'.includes(nextCh)) {
                     const node = {id: ++curNodeId, type: INodeType.NODE_CONCAT};
                     tree.nodes[node.id] = node;
                     tree.parents[top.id] = [node.id, true];
                     tree.parents[prevTop.id] = [node.id, false];
                     stack.push(node);
-                } else if (top) {
-                    stack.push(top);
+                } else {
+                    if (prevTop) {
+                        stack.push(prevTop);
+                    }
+                    if (top) {
+                        stack.push(top);
+                    }
                 }
             } else if (ch == '+' || ch == '*') {
                 const top = stack.pop()!;
@@ -86,7 +91,7 @@ export class TreeBuilder implements ITreeBuilder {
                     tree.parents[node.id] = tree.parents[top.id];
                 }
 
-                tree.parents[top.id] = [node.id, true];
+                tree.parents[top.id] = [node.id, false];
             } else if (ch == '|') {
                 const node = {
                     id: ++curNodeId,

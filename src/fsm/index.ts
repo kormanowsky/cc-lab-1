@@ -37,8 +37,6 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
                     }
                 }
 
-                console.log(40, id, u);
-
                 if (id === -1) {
                     const newSt = {id: ++stateId, positions: u};
 
@@ -141,7 +139,7 @@ export class FSMBuilder implements IFiniteStateMachineBuilder {
             }
         }
 
-        console.log(P, Class, Queue);
+        console.log(P, Class);
         
         // TODO:
         return {

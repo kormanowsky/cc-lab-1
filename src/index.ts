@@ -14,10 +14,12 @@ async function main() {
 
     const regex = await reader.readRegex();
     const tree = await builder.buildTree(regex + "#");
+
+    await printer.printTree(tree);
+
     const funcs = await computer.computeTreeFuncs(tree);
     const fsm = await fsmBuilder.buildFSM(tree, funcs, "ab");
 
-    await printer.printTree(tree);
     await printer2.printFSM(fsm);
 
     await fsmBuilder.buildMinifiedFsm(fsm);

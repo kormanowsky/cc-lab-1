@@ -1,1 +1,1 @@
-a(b|a)*ba
+(a|b)*(aa|bb)(a|b)*
