@@ -192,12 +192,13 @@ async function main() {
         }
 
         console.log('Enter command:');
-        cmd = parseInt(await cmdReader.readString(), 10);
+        const cmdStr = await cmdReader.readString();
+        cmd = parseInt(cmdStr.trim(), 10);
 
         if (cmd >= 0 && cmd < commands.length) {
             state = await commands[cmd].invoke(state);
         } else {
-            console.error('Invalid command!');
+            console.error('Invalid command!', cmdStr);
         }
     } while (true);
 }
